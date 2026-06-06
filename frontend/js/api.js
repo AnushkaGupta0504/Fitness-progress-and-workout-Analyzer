@@ -1,5 +1,5 @@
 // ===== API Configuration =====
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://fitness-progress-and-workout-analyzer.onrender.com';
 
 const api = {
   getToken: () => localStorage.getItem('fitness_token'),
