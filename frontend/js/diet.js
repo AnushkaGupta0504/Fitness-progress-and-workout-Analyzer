@@ -16,20 +16,37 @@ const foodDatabase = {
 
 function calculateNutrition(foodName, quantity) {
 
-  const food = foodDatabase[foodName.toLowerCase()];
+  const foodDatabase = {
+  egg: { calories: 155, protein: 13, carbs: 1, fat: 11 },
+  rice: { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
+  chicken: { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+  milk: { calories: 60, protein: 3.2, carbs: 5, fat: 3.3 },
+  bread: { calories: 265, protein: 9, carbs: 49, fat: 3.2 },
+  apple: { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
+  banana: { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
 
-  if (!food) {
-    alert("Food not found in database");
-    return null;
-  }
+  tofu: { calories: 76, protein: 8, carbs: 2, fat: 4.8 },
+  paneer: { calories: 265, protein: 18, carbs: 1.2, fat: 20 },
+  oats: { calories: 389, protein: 17, carbs: 66, fat: 7 },
+  dal: { calories: 116, protein: 9, carbs: 20, fat: 0.4 },
+  roti: { calories: 120, protein: 3, carbs: 24, fat: 1 },
+  chapati: { calories: 120, protein: 3, carbs: 24, fat: 1 },
+  potato: { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
+  pizza: { calories: 266, protein: 11, carbs: 33, fat: 10 },
+  burger: { calories: 295, protein: 17, carbs: 30, fat: 14 },
+  pasta: { calories: 131, protein: 5, carbs: 25, fat: 1 },
+  yogurt: { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+  almonds: { calories: 579, protein: 21, carbs: 22, fat: 50 }
+};
 
-  // quantity multiply mat karo
+if (!food) {
   return {
-    calories: food.calories,
-    protein: food.protein,
-    carbs: food.carbs,
-    fat: food.fat
+    calories: 100,
+    protein: 5,
+    carbs: 10,
+    fat: 5
   };
+}
 }
 
 async function loadDietPage() {
@@ -308,29 +325,24 @@ function onFoodNameInput() {
 
 async function addFood() {
 
-  const name = document.getElementById('foodName').value.trim();
+  const name = document.getElementById('foodName').value.trim().toLowerCase();
   const qty = parseFloat(document.getElementById('foodQty').value) || 1;
   const meal = document.getElementById('foodMeal').value;
   const errEl = document.getElementById('foodError');
 
   errEl.textContent = '';
 
+  const nutrition = calculateNutrition(name, qty);
+
   try {
 
-    const lookup = await api.post('/nutrition/lookup', {
-      foodName: name,
-      quantity: qty
-    });
-
-    const n = lookup.nutrition;
-
     await api.post(`/nutrition/meal/${meal}`, {
-      name: n.food_name || name,
+      name,
       quantity: qty,
-      calories: n.calories,
-      protein: n.protein,
-      carbs: n.carbs,
-      fat: n.fat
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbs,
+      fat: nutrition.fat
     });
 
     document.getElementById('addFoodModal').classList.remove('active');
