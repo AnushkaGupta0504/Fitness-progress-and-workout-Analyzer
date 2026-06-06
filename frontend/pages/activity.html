@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity Tracker — FitnessAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    /* ── Activity page styles ── */
+    .activity-hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .hero-card:hover { transform: translateY(-3px); }
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      opacity: 0.07;
+    }
+    .hero-card.steps::before { background: var(--primary-light); }
+    .hero-card.heart::before { background: #ef4444; }
+    .hero-card.active::before { background: var(--accent-teal); }
+    .hero-card.distance::before { background: var(--accent-orange); }
+    .hero-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .hero-value { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .hero-sub { font-size: 0.82rem; color: var(--text-secondary); }
+    .hero-icon { font-size: 2rem; margin-bottom: 12px; }
+    .hero-progress { height: 5px; background: rgba(255,255,255,0.08); border-radius: 99px; margin-top: 14px; overflow: hidden; }
+    .hero-progress-bar { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+    /* Heart Rate Monitor */
+    .heart-monitor {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hr-live {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+    .hr-bpm-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid rgba(239,68,68,0.4);
+      background: rgba(239,68,68,0.06);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .hr-bpm-display.beating { animation: heartbeat 0.8s infinite; }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); border-color: rgba(239,68,68,0.4); }
+      30% { transform: scale(1.06); border-color: rgba(239,68,68,0.9); }
+      60% { transform: scale(1.02); border-color: rgba(239,68,68,0.6); }
+    }
+    .hr-bpm-num { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: #ef4444; line-height: 1; }
+    .hr-bpm-unit { font-size: 0.72rem; color: var(--text-muted); }
+    .hr-zone-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .hr-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; }
+    .hr-detail-item { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px; }
+    .hr-detail-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+    .hr-detail-val { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+
+    /* HR Zones bar */
+    .hr-zones { display: flex; gap: 8px; margin-top: 16px; }
+    .hr-zone-item { flex: 1; }
+    .hr-zone-bar { height: 8px; border-radius: 4px; margin-bottom: 6px; position: relative; overflow: hidden; }
+    .hr-zone-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .hr-zone-name { font-size: 0.68rem; color: var(--text-muted); text-align: center; }
+    .hr-zone-range { font-size: 0.65rem; color: var(--text-muted); text-align: center; opacity: 0.7; }
+
+    /* Step counter ring */
+    .step-ring-wrap { display: flex; align-items: center; gap: 28px; }
+    .step-ring-svg { width: 140px; height: 140px; flex-shrink: 0; }
+    .step-ring-center { font-family: var(--font-display); }
+
+    /* Activity log form */
+    .log-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+    .form-group input {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 10px; padding: 10px 14px;
+      color: var(--text-primary); font-family: var(--font-body); font-size: 0.95rem;
+      outline: none; transition: border 0.2s;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+
+    /* Activity timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .timeline-date { font-size: 0.78rem; color: var(--text-muted); min-width: 70px; }
+    .timeline-steps { font-weight: 600; font-size: 0.95rem; }
+    .timeline-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .timeline-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--primary), var(--accent-pink)); }
+    .timeline-hr { font-size: 0.82rem; color: #ef4444; min-width: 60px; text-align: right; }
+
+    /* Simulate button */
+    .simulate-btn {
+      background: linear-gradient(135deg, rgba(124,92,252,0.2), rgba(0,212,170,0.1));
+      border: 1px solid var(--border);
+      color: var(--primary-light);
+      padding: 10px 20px; border-radius: 10px;
+      cursor: pointer; font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .simulate-btn:hover { background: rgba(124,92,252,0.3); transform: translateY(-1px); }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } .hr-details { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="app-body">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span>Fitness<strong>AI</strong></span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
+      <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-label">Analytics</span></a>
+      <a href="activity.html" class="nav-item active"><span class="nav-icon">❤️</span><span class="nav-label">Activity</span></a>
+      <a href="diet.html" class="nav-item"><span class="nav-icon">🥗</span><span class="nav-label">Diet Tracker</span></a>
+      <a href="workouts.html" class="nav-item"><span class="nav-icon">💪</span><span class="nav-label">Workouts</span></a>
+      <a href="coach.html" class="nav-item"><span class="nav-icon">🤖</span><span class="nav-label">AI Coach</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></a>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-info"><div class="user-name" id="sidebarName">Loading...</div><div class="user-sub" id="sidebarGoal">—</div></div>
+        <button class="btn-icon" onclick="logout()" style="margin-left:auto;font-size:0.9rem">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Activity Tracker</h1>
+        <p class="page-sub">Heart rate, steps & daily movement</p>
+      </div>
+      <div class="topbar-right">
+        <button class="simulate-btn" onclick="simulateLiveData()">⚡ Simulate Live Data</button>
+        <button class="topbar-avatar" id="topbarAvatar">A</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- HERO STATS -->
+      <div class="activity-hero">
+        <div class="hero-card steps">
+          <div class="hero-icon">🚶</div>
+          <div class="hero-label">Steps Today</div>
+          <div class="hero-value" id="heroSteps">—</div>
+          <div class="hero-sub">Goal: <span id="heroStepGoal">10,000</span></div>
+          <div class="hero-progress">
+            <div class="hero-progress-bar" id="stepsProgressBar" style="background:var(--primary-light);width:0%"></div>
+          </div>
+        </div>
+        <div class="hero-card heart">
+          <div class="hero-icon">❤️</div>
+          <div class="hero-label">Heart Rate</div>
+          <div class="hero-value" style="color:#ef4444" id="heroHR">—</div>
+          <div class="hero-sub" id="heroHRZone">Zone: —</div>
+          <div class="hero-progress">
+            <div class="hero-progress-bar" id="hrProgressBar" style="background:#ef4444;width:0%"></div>
+          </div>
+        </div>
+        <div class="hero-card active">
+          <div class="hero-icon">⏱️</div>
+          <div class="hero-label">Active Minutes</div>
+          <div class="hero-value" style="color:var(--accent-teal)" id="heroActive">—</div>
+          <div class="hero-sub">Goal: 30 min/day</div>
+          <div class="hero-progress">
+            <div class="hero-progress-bar" id="activeProgressBar" style="background:var(--accent-teal);width:0%"></div>
+          </div>
+        </div>
+        <div class="hero-card distance">
+          <div class="hero-icon">📍</div>
+          <div class="hero-label">Distance</div>
+          <div class="hero-value" style="color:var(--accent-orange)" id="heroDistance">—</div>
+          <div class="hero-sub">km covered today</div>
+          <div class="hero-progress">
+            <div class="hero-progress-bar" id="distProgressBar" style="background:var(--accent-orange);width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEART RATE MONITOR + STEP RING -->
+      <div class="two-col" style="margin-bottom:20px">
+        <!-- Heart Rate Monitor -->
+        <div class="heart-monitor card">
+          <div class="card-top" style="margin-bottom:20px">
+            <h3>❤️ Heart Rate Monitor</h3>
+            <span class="badge badge-pink" id="hrStatusBadge">Live</span>
+          </div>
+          <div class="hr-live">
+            <div class="hr-bpm-display" id="hrBpmDisplay">
+              <div class="hr-bpm-num" id="hrBpmNum">--</div>
+              <div class="hr-bpm-unit">BPM</div>
+            </div>
+            <div class="hr-details">
+              <div class="hr-detail-item">
+                <div class="hr-detail-label">Zone</div>
+                <div class="hr-detail-val" id="hrZoneDetail">—</div>
+              </div>
+              <div class="hr-detail-item">
+                <div class="hr-detail-label">Max HR</div>
+                <div class="hr-detail-val" id="hrMaxDetail">—</div>
+              </div>
+              <div class="hr-detail-item">
+                <div class="hr-detail-label">Resting HR</div>
+                <div class="hr-detail-val">60–100 bpm</div>
+              </div>
+              <div class="hr-detail-item">
+                <div class="hr-detail-label">Calories (est.)</div>
+                <div class="hr-detail-val" id="hrCalDetail">—</div>
+              </div>
+            </div>
+          </div>
+          <!-- HR Zones -->
+          <div class="hr-zones">
+            <div class="hr-zone-item">
+              <div class="hr-zone-bar"><div class="hr-zone-fill" id="zoneResting" style="background:#60a5fa"></div></div>
+              <div class="hr-zone-name">Resting</div>
+              <div class="hr-zone-range">&lt;50%</div>
+            </div>
+            <div class="hr-zone-item">
+              <div class="hr-zone-bar"><div class="hr-zone-fill" id="zoneLight" style="background:#34d399"></div></div>
+              <div class="hr-zone-name">Light</div>
+              <div class="hr-zone-range">50–60%</div>
+            </div>
+            <div class="hr-zone-item">
+              <div class="hr-zone-bar"><div class="hr-zone-fill" id="zoneModerate" style="background:var(--accent-yellow)"></div></div>
+              <div class="hr-zone-name">Moderate</div>
+              <div class="hr-zone-range">60–70%</div>
+            </div>
+            <div class="hr-zone-item">
+              <div class="hr-zone-bar"><div class="hr-zone-fill" id="zoneHard" style="background:var(--accent-orange)"></div></div>
+              <div class="hr-zone-name">Hard</div>
+              <div class="hr-zone-range">70–80%</div>
+            </div>
+            <div class="hr-zone-item">
+              <div class="hr-zone-bar"><div class="hr-zone-fill" id="zoneMax" style="background:#ef4444"></div></div>
+              <div class="hr-zone-name">Max</div>
+              <div class="hr-zone-range">&gt;80%</div>
+            </div>
+          </div>
+          <!-- HR chart -->
+          <div style="margin-top:18px">
+            <canvas id="hrChart" height="90"></canvas>
+          </div>
+        </div>
+
+        <!-- Step Ring + Count -->
+        <div class="card">
+          <div class="card-top" style="margin-bottom:20px">
+            <h3>🚶 Step Counter</h3>
+            <span class="badge badge-purple" id="stepBadge">0%</span>
+          </div>
+          <div class="step-ring-wrap">
+            <svg class="step-ring-svg" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+              <circle cx="70" cy="70" r="60" fill="none"
+                stroke="url(#stepGrad)" stroke-width="12"
+                stroke-linecap="round"
+                stroke-dasharray="377"
+                stroke-dashoffset="377"
+                id="stepRingCircle"
+                transform="rotate(-90 70 70)"
+                style="transition:stroke-dashoffset 1.2s ease"/>
+              <defs>
+                <linearGradient id="stepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="var(--primary)"/>
+                  <stop offset="100%" stop-color="var(--accent-pink)"/>
+                </linearGradient>
+              </defs>
+              <text x="70" y="62" text-anchor="middle" fill="white" font-size="22" font-weight="700" font-family="Clash Display, sans-serif" id="stepRingNum">0</text>
+              <text x="70" y="80" text-anchor="middle" fill="#6060a0" font-size="10" font-family="Plus Jakarta Sans, sans-serif">STEPS</text>
+              <text x="70" y="96" text-anchor="middle" fill="#9b7eff" font-size="9" font-family="Plus Jakarta Sans, sans-serif" id="stepRingPct">0%</text>
+            </svg>
+            <div style="flex:1">
+              <div style="margin-bottom:16px">
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px">Today's Goal</div>
+                <div style="font-size:1.4rem;font-weight:700;font-family:var(--font-display)" id="stepGoalDisplay">10,000</div>
+              </div>
+              <div style="margin-bottom:16px">
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px">Remaining</div>
+                <div style="font-size:1.4rem;font-weight:700;font-family:var(--font-display)" id="stepRemaining">—</div>
+              </div>
+              <div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px">Est. Calories</div>
+                <div style="font-size:1.4rem;font-weight:700;font-family:var(--font-display);color:var(--accent-orange)" id="stepCalories">—</div>
+              </div>
+            </div>
+          </div>
+          <!-- 7-day steps chart -->
+          <div style="margin-top:20px">
+            <canvas id="stepsWeekChart" height="100"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOG ACTIVITY + HISTORY -->
+      <div class="two-col">
+        <!-- Log Form -->
+        <div class="card">
+          <div class="card-top" style="margin-bottom:20px">
+            <h3>📝 Log Activity</h3>
+          </div>
+          <div class="log-form">
+            <div class="form-group">
+              <label>Steps Count</label>
+              <input type="number" id="inputSteps" placeholder="e.g. 8500" min="0" max="100000"/>
+            </div>
+            <div class="form-group">
+              <label>Heart Rate (BPM)</label>
+              <input type="number" id="inputHR" placeholder="e.g. 72" min="30" max="220"/>
+            </div>
+            <div class="form-group">
+              <label>Active Minutes</label>
+              <input type="number" id="inputActive" placeholder="e.g. 45" min="0" max="1440"/>
+            </div>
+            <div class="form-group">
+              <label>Distance (km)</label>
+              <input type="number" id="inputDist" step="0.1" placeholder="e.g. 5.2" min="0"/>
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top:18px;width:100%" onclick="logActivity()">Save Activity Data</button>
+        </div>
+
+        <!-- History timeline -->
+        <div class="card">
+          <div class="card-top" style="margin-bottom:16px">
+            <h3>📅 7-Day History</h3>
+          </div>
+          <div class="timeline" id="activityTimeline">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/activity.js"></script>
+</body>
+</html>

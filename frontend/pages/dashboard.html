@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — FitnessAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/app.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <span>Fitness<strong>AI</strong></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+      </a>
+      <a href="analytics.html" class="nav-item" data-page="analytics">
+        <span class="nav-icon">📈</span><span class="nav-label">Analytics</span>
+      </a>
+      <a href="diet.html" class="nav-item" data-page="diet">
+        <span class="nav-icon">🥗</span><span class="nav-label">Diet Tracker</span>
+      </a>
+      <a href="workouts.html" class="nav-item" data-page="workouts">
+        <span class="nav-icon">💪</span><span class="nav-label">Workouts</span>
+      </a>
+      <a href="coach.html" class="nav-item" data-page="coach">
+        <span class="nav-icon">🤖</span><span class="nav-label">AI Coach</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="settings.html" class="nav-item" data-page="settings">
+        <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+      </a>
+      <div class="sidebar-user" id="sidebarUser">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarName">Loading...</div>
+          <div class="user-sub" id="sidebarGoal">—</div>
+        </div>
+        <button class="btn-icon" onclick="logout()" title="Logout" style="margin-left:auto;font-size:0.9rem">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="app-main">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub" id="todayDate"></p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" placeholder="Search anything..." />
+        </div>
+        <button class="topbar-avatar" id="topbarAvatar">A</button>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content">
+
+      <!-- WELCOME BANNER -->
+      <div class="welcome-banner card">
+        <div class="welcome-text">
+          <h2>Hello, <span id="welcomeName">User</span>! 👋</h2>
+          <p>Here's your fitness summary for today. Keep pushing your limits!</p>
+        </div>
+        <div class="welcome-cta">
+          <button class="btn-primary" onclick="window.location.href='workouts.html'">Log Workout</button>
+          <button class="btn-ghost btn-sm" onclick="window.location.href='diet.html'">Log Meal</button>
+        </div>
+      </div>
+
+      <!-- STATS GRID -->
+      <div class="stats-grid" id="statsGrid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+        <div class="stat-card" style="cursor:pointer" onclick="window.location.href='activity.html'">
+          <div class="stat-icon" style="background:rgba(124,92,252,0.15);color:var(--primary-light)">🚶</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statSteps">—</div>
+            <div class="stat-label">Steps Today</div>
+            <div class="stat-goal">Goal: <span id="stepGoal">10,000</span></div>
+          </div>
+        </div>
+        <div class="stat-card" style="cursor:pointer" onclick="window.location.href='activity.html'">
+          <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#ef4444">❤️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statHeartRate" style="color:#ef4444">—</div>
+            <div class="stat-label">Heart Rate</div>
+            <div class="stat-goal" id="statHRZone">Zone: —</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,107,157,0.15);color:var(--accent-pink)">🔥</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statCalsBurned">—</div>
+            <div class="stat-label">Calories Burned</div>
+            <div class="stat-goal">This week</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(0,212,170,0.15);color:var(--accent-teal)">🥗</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statCalories">—</div>
+            <div class="stat-label">Calories Today</div>
+            <div class="stat-goal">Goal: <span id="calGoal">2000</span> kcal</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,140,66,0.15);color:var(--accent-orange)">💧</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statWater">— <span style="font-size:1rem">glasses</span></div>
+            <div class="stat-label">Water Intake</div>
+            <div class="stat-goal">Goal: 8 glasses</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="charts-row">
+        <div class="card chart-card" style="flex:2">
+          <div class="card-top">
+            <h3>Calories Burned</h3>
+            <span class="badge badge-purple">Last 7 Days</span>
+          </div>
+          <canvas id="caloriesChart" height="180"></canvas>
+        </div>
+        <div class="card chart-card" style="flex:1">
+          <div class="card-top">
+            <h3>Meal Statistics</h3>
+            <span class="badge badge-pink">Today</span>
+          </div>
+          <canvas id="macroChart" height="180"></canvas>
+          <div class="macro-legend" id="macroLegend"></div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="bottom-row">
+        <!-- Activity Schedule -->
+        <div class="card" style="flex:1">
+          <div class="card-top">
+            <h3>Activity Schedule</h3>
+            <button class="btn-sm btn-ghost" onclick="window.location.href='workouts.html'">View All</button>
+          </div>
+          <div class="activity-list" id="activityList">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+        <!-- Steps Chart -->
+        <div class="card" style="flex:1.5">
+          <div class="card-top">
+            <h3>Weekly Workouts</h3>
+            <span class="badge badge-teal" id="weeklyWorkoutBadge">0 this week</span>
+          </div>
+          <canvas id="workoutsChart" height="160"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

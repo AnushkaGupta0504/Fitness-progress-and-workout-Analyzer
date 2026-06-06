@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diet Tracker — FitnessAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css"><link rel="stylesheet" href="../css/app.css">
+</head>
+<body class="app-body">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span>Fitness<strong>AI</strong></span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a>
+      <a href="analytics.html" class="nav-item"><span class="nav-icon">📈</span><span class="nav-label">Analytics</span></a>
+      <a href="activity.html" class="nav-item"><span class="nav-icon">❤️</span><span class="nav-label">Activity</span></a>
+      <a href="diet.html" class="nav-item active"><span class="nav-icon">🥗</span><span class="nav-label">Diet Tracker</span></a>
+      <a href="workouts.html" class="nav-item"><span class="nav-icon">💪</span><span class="nav-label">Workouts</span></a>
+      <a href="coach.html" class="nav-item"><span class="nav-icon">🤖</span><span class="nav-label">AI Coach</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></a>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">A</div>
+        <div class="user-info"><div class="user-name" id="sidebarName">Loading...</div><div class="user-sub" id="sidebarGoal">—</div></div>
+        <button class="btn-icon" onclick="logout()" style="margin-left:auto;font-size:0.9rem">🚪</button>
+      </div>
+    </div>
+  </aside>
+  <main class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Diet Tracker</h1>
+        <p class="page-sub" id="todayDate"></p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-primary" onclick="showAddFoodModal()">+ Add Food</button>
+        <button class="topbar-avatar" id="topbarAvatar">A</button>
+      </div>
+    </header>
+    <div class="page-content">
+
+      <!-- MACRO SUMMARY -->
+      <div class="macro-summary">
+        <div class="macro-card">
+          <div class="macro-label">Calories</div>
+          <div class="macro-val" id="macroCalories" style="color:var(--accent-pink)">0</div>
+          <div class="macro-goal">Goal: <span id="calGoal">2000</span> kcal</div>
+          <div class="progress-bar mt-8"><div class="progress-fill" id="calProgress" style="width:0%;background:linear-gradient(90deg,var(--accent-pink),var(--accent-orange))"></div></div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Protein</div>
+          <div class="macro-val" id="macroProtein" style="color:var(--primary-light)">0g</div>
+          <div class="macro-goal">Goal: <span id="proteinGoal">120</span>g</div>
+          <div class="progress-bar mt-8"><div class="progress-fill" id="proteinProgress" style="width:0%;background:linear-gradient(90deg,var(--primary),var(--primary-light))"></div></div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Carbohydrates</div>
+          <div class="macro-val" id="macroCarbs" style="color:var(--accent-teal)">0g</div>
+          <div class="macro-goal">Goal: <span id="carbsGoal">250</span>g</div>
+          <div class="progress-bar mt-8"><div class="progress-fill" id="carbsProgress" style="width:0%;background:linear-gradient(90deg,var(--accent-teal),#00a8ff)"></div></div>
+        </div>
+        <div class="macro-card">
+          <div class="macro-label">Fat</div>
+          <div class="macro-val" id="macroFat" style="color:var(--accent-yellow)">0g</div>
+          <div class="macro-goal">Goal: 65g</div>
+          <div class="progress-bar mt-8"><div class="progress-fill" id="fatProgress" style="width:0%;background:linear-gradient(90deg,var(--accent-yellow),var(--accent-orange))"></div></div>
+        </div>
+      </div>
+
+      <!-- WATER TRACKER -->
+      <div class="card">
+        <div class="card-top">
+          <h3>💧 Water Intake</h3>
+          <span class="badge badge-teal" id="waterBadge">0 / 8 glasses</span>
+        </div>
+        <div class="water-glasses" id="waterGlasses"></div>
+      </div>
+
+      <!-- MEALS GRID -->
+      <div class="meals-grid" id="mealsGrid">
+        <!-- Dynamically generated -->
+      </div>
+    </div>
+  </main>
+
+  <!-- ADD FOOD MODAL -->
+  <div class="modal-overlay" id="addFoodModal" onclick="closeAddFoodModal(event)">
+    <div class="modal-box" style="max-width:520px">
+      <button class="modal-close" onclick="document.getElementById('addFoodModal').classList.remove('active')">✕</button>
+      <h2 style="margin-bottom:6px">Add Food</h2>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px">Type a food name and let AI calculate the nutrition ✨</p>
+      <div class="form-section">
+        <div class="form-group">
+          <label>Meal</label>
+          <select id="foodMeal">
+            <option value="breakfast">🌅 Breakfast</option>
+            <option value="lunch">☀️ Lunch</option>
+            <option value="dinner">🌙 Dinner</option>
+            <option value="snacks">🍎 Snacks</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2">
+            <label>Food Name *</label>
+            <div style="position:relative">
+              <input type="text" id="foodName" placeholder="e.g. Butter Chicken, 2 eggs..." oninput="onFoodNameInput()" onkeydown="if(event.key==='Enter')lookupNutrition()" style="padding-right:90px"/>
+              
+            </div>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Servings</label>
+            <input type="number" id="foodQty" value="1" min="0.1" step="0.1" onchange="lookupNutrition()" />
+          </div>
+        </div>
+
+        <!-- AI Lookup Status -->
+        <!-- <div id="lookupStatus" style="display:none;align-items:center;gap:10px;padding:12px 16px;background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:10px;margin-bottom:4px;font-size:0.85rem;color:var(--text-secondary)">
+          <span id="lookupStatusIcon">⏳</span>
+          <span id="lookupStatusText">Looking up nutrition...</span>
+        </div> -->
+
+        <!-- Nutrition Card - shown after lookup -->
+        <div id="nutritionPreview" style="display:none;background:rgba(0,212,170,0.06);border:1px solid rgba(0,212,170,0.2);border-radius:12px;padding:16px;margin-bottom:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="font-weight:700;font-size:1rem" id="previewFoodName">—</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)" id="previewServing">per serving</div>
+            </div>
+            <div style="font-size:1.5rem;font-weight:800;color:var(--accent-pink)" id="previewCalories">— kcal</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+            <div style="text-align:center;background:rgba(155,126,255,0.1);border-radius:8px;padding:10px">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--primary-light)" id="previewProtein">—g</div>
+              <div style="font-size:0.7rem;color:var(--text-muted)">Protein</div>
+            </div>
+            <div style="text-align:center;background:rgba(0,212,170,0.1);border-radius:8px;padding:10px">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--accent-teal)" id="previewCarbs">—g</div>
+              <div style="font-size:0.7rem;color:var(--text-muted)">Carbs</div>
+            </div>
+            <div style="text-align:center;background:rgba(255,209,102,0.1);border-radius:8px;padding:10px">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--accent-yellow)" id="previewFat">—g</div>
+              <div style="font-size:0.7rem;color:var(--text-muted)">Fat</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);text-align:center">✨ AI estimated · You can adjust below if needed</div>
+        </div>
+
+        <!-- Manual override (collapsed by default) -->
+        <details id="manualOverride" style="margin-top:8px">
+          <summary style="font-size:0.82rem;color:var(--text-muted);cursor:pointer;padding:6px 0;user-select:none">⚙️ Manually adjust values</summary>
+          <div style="margin-top:12px">
+            <div class="form-row">
+              <div class="form-group"><label>Calories (kcal)</label><input type="number" id="foodCal" placeholder="—" /></div>
+              <div class="form-group"><label>Protein (g)</label><input type="number" id="foodProtein" placeholder="—" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Carbs (g)</label><input type="number" id="foodCarbs" placeholder="—" /></div>
+              <div class="form-group"><label>Fat (g)</label><input type="number" id="foodFat" placeholder="—" /></div>
+            </div>
+          </div>
+        </details>
+      </div>
+      <div class="form-error" id="foodError"></div>
+      <div style="display:flex;gap:12px;margin-top:20px">
+        <button class="btn-ghost btn-full" onclick="document.getElementById('addFoodModal').classList.remove('active')">Cancel</button>
+        <button class="btn-primary btn-full" onclick="addFood()" id="addFoodBtn">Add Food</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../js/api.js"></script><script src="../js/app.js"></script><script src="../js/diet.js"></script>
+</body>
+</html>
