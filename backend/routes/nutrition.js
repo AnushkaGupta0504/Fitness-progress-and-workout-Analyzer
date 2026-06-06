@@ -102,8 +102,8 @@ router.post('/lookup', protect, async (req, res) => {
 {"calories":0,"protein":0,"carbs":0,"fat":0,"fiber":0,"serving_description":"1 serving","food_name":"name"}
 Fill in real values for the food. Return ONLY the JSON object.`;
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+   const geminiRes = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
