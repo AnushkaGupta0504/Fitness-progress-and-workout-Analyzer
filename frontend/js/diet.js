@@ -240,71 +240,114 @@ function onFoodNameInput() {
 //     btn.disabled = false;
 //   }
 // }
+// async function addFood() {
+
+//   const name = document.getElementById('foodName').value.trim().toLowerCase();
+//   const qty = parseFloat(document.getElementById('foodQty').value) || 1;
+//   const meal = document.getElementById('foodMeal').value;
+//   const errEl = document.getElementById('foodError');
+
+//   errEl.textContent = '';
+
+//   if (!name) {
+//     errEl.textContent = 'Please enter a food name';
+//     return;
+//   }
+
+//   let calories, protein, carbs, fat;
+
+//   // ===== TRY DATABASE FIRST =====
+//   const nutrition = calculateNutrition(name, qty);
+
+//   if (nutrition) {
+
+//     calories = nutrition.calories;
+//     protein = nutrition.protein;
+//     carbs = nutrition.carbs;
+//     fat = nutrition.fat;
+
+//   } else {
+
+//     // ===== MANUAL INPUT =====
+//     calories = parseFloat(document.getElementById('foodCal').value);
+//     protein = parseFloat(document.getElementById('foodProtein').value) || 0;
+//     carbs = parseFloat(document.getElementById('foodCarbs').value) || 0;
+//     fat = parseFloat(document.getElementById('foodFat').value) || 0;
+
+//     if (!calories) {
+//       errEl.textContent = "Food not in database. Enter calories manually.";
+//       return;
+//     }
+
+//   }
+
+//   try {
+
+//     await api.post(`/nutrition/meal/${meal}`, {
+//       name,
+//       quantity: qty,
+//       calories,
+//       protein,
+//       carbs,
+//       fat
+//     });
+
+//     document.getElementById('addFoodModal').classList.remove('active');
+
+//     showToast(`✅ ${name} added to ${meal}!`, 'success');
+
+//     await loadTodayLog();
+
+//   } catch (err) {
+
+//     errEl.textContent = err.message;
+
+//   }
+
+// }
+
 async function addFood() {
 
-  const name = document.getElementById('foodName').value.trim().toLowerCase();
+  const name = document.getElementById('foodName').value.trim();
   const qty = parseFloat(document.getElementById('foodQty').value) || 1;
   const meal = document.getElementById('foodMeal').value;
   const errEl = document.getElementById('foodError');
 
   errEl.textContent = '';
 
-  if (!name) {
-    errEl.textContent = 'Please enter a food name';
-    return;
-  }
-
-  let calories, protein, carbs, fat;
-
-  // ===== TRY DATABASE FIRST =====
-  const nutrition = calculateNutrition(name, qty);
-
-  if (nutrition) {
-
-    calories = nutrition.calories;
-    protein = nutrition.protein;
-    carbs = nutrition.carbs;
-    fat = nutrition.fat;
-
-  } else {
-
-    // ===== MANUAL INPUT =====
-    calories = parseFloat(document.getElementById('foodCal').value);
-    protein = parseFloat(document.getElementById('foodProtein').value) || 0;
-    carbs = parseFloat(document.getElementById('foodCarbs').value) || 0;
-    fat = parseFloat(document.getElementById('foodFat').value) || 0;
-
-    if (!calories) {
-      errEl.textContent = "Food not in database. Enter calories manually.";
-      return;
-    }
-
-  }
-
   try {
 
+    const lookup = await api.post('/nutrition/lookup', {
+      foodName: name,
+      quantity: qty
+    });
+
+    const n = lookup.nutrition;
+
     await api.post(`/nutrition/meal/${meal}`, {
-      name,
+      name: n.food_name || name,
       quantity: qty,
-      calories,
-      protein,
-      carbs,
-      fat
+      calories: n.calories,
+      protein: n.protein,
+      carbs: n.carbs,
+      fat: n.fat
     });
 
     document.getElementById('addFoodModal').classList.remove('active');
 
-    showToast(`✅ ${name} added to ${meal}!`, 'success');
+    showToast(`✅ ${name} added successfully`, 'success');
 
     await loadTodayLog();
 
   } catch (err) {
 
+    console.error(err);
     errEl.textContent = err.message;
 
   }
-
 }
+
+
 // async function addFood() {
 //   const name = document.getElementById('foodName').value.trim();
 //   const qty = parseFloat(document.getElementById('foodQty').value) || 1;
