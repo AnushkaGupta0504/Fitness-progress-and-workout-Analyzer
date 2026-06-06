@@ -16,37 +16,23 @@ const foodDatabase = {
 
 function calculateNutrition(foodName, quantity) {
 
-  const foodDatabase = {
-  egg: { calories: 155, protein: 13, carbs: 1, fat: 11 },
-  rice: { calories: 130, protein: 2.7, carbs: 28, fat: 0.3 },
-  chicken: { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-  milk: { calories: 60, protein: 3.2, carbs: 5, fat: 3.3 },
-  bread: { calories: 265, protein: 9, carbs: 49, fat: 3.2 },
-  apple: { calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
-  banana: { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+  const food = foodDatabase[foodName.toLowerCase()];
 
-  tofu: { calories: 76, protein: 8, carbs: 2, fat: 4.8 },
-  paneer: { calories: 265, protein: 18, carbs: 1.2, fat: 20 },
-  oats: { calories: 389, protein: 17, carbs: 66, fat: 7 },
-  dal: { calories: 116, protein: 9, carbs: 20, fat: 0.4 },
-  roti: { calories: 120, protein: 3, carbs: 24, fat: 1 },
-  chapati: { calories: 120, protein: 3, carbs: 24, fat: 1 },
-  potato: { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
-  pizza: { calories: 266, protein: 11, carbs: 33, fat: 10 },
-  burger: { calories: 295, protein: 17, carbs: 30, fat: 14 },
-  pasta: { calories: 131, protein: 5, carbs: 25, fat: 1 },
-  yogurt: { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
-  almonds: { calories: 579, protein: 21, carbs: 22, fat: 50 }
-};
+  if (!food) {
+    return {
+      calories: 100,
+      protein: 5,
+      carbs: 10,
+      fat: 5
+    };
+  }
 
-if (!food) {
   return {
-    calories: 100,
-    protein: 5,
-    carbs: 10,
-    fat: 5
+    calories: food.calories,
+    protein: food.protein,
+    carbs: food.carbs,
+    fat: food.fat
   };
-}
 }
 
 async function loadDietPage() {
@@ -148,8 +134,12 @@ function showAddFoodModal(meal = 'breakfast') {
   document.getElementById('addFoodModal').classList.add('active');
   // Reset state
   aiNutrition = null;
-  document.getElementById('nutritionPreview').style.display = 'none';
-  document.getElementById('lookupStatus').style.display = 'none';
+
+  const nutritionPreview = document.getElementById('nutritionPreview');
+  const lookupStatus = document.getElementById('lookupStatus');
+
+  if (nutritionPreview) nutritionPreview.style.display = 'none';
+  if (lookupStatus) lookupStatus.style.display = 'none'; 
   ['foodName','foodCal','foodProtein','foodCarbs','foodFat'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('foodQty').value = '1';
   document.getElementById('foodError').textContent = '';
@@ -164,12 +154,10 @@ function closeAddFoodModal(e) {
 // Debounce lookup as user types
 function onFoodNameInput() {
   clearTimeout(lookupDebounce);
-  aiNutrition = null;
-  document.getElementById('nutritionPreview').style.display = 'none';
-  document.getElementById('lookupStatus').style.display = 'none';
+
   const name = document.getElementById('foodName').value.trim();
+
   if (name.length < 3) return;
-  lookupDebounce = setTimeout(() => lookupNutrition(), 900);
 }
 
 // async function lookupNutrition() {
